@@ -2,6 +2,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import SessionWrapper from "@/components/SessionWrapper";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -14,11 +15,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Navbar/>
-        <div className=" bg-white bg-[radial-gradient(rgba(120,119,198,0.3),rgba(255,255,255,0))] min-h-[87vh]">
-          {children}
-        </div>
-        <Footer/>
+        <SessionWrapper>
+          <Navbar />
+          <div className=" bg-white bg-[radial-gradient(rgba(120,119,198,0.3),rgba(255,255,255,0))] min-h-[87vh]">
+            {children}
+          </div>
+          <Footer />
+        </SessionWrapper>
       </body>
     </html>
   );
