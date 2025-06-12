@@ -34,7 +34,7 @@ className="text-white mx-4  font-medium rounded-lg text-sm px-5 py-2.5 text-cent
         <Link href="#" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">Your Page</Link>
       </li>
       <li>
-        <Link href="/" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onClick={()=>{signOut()}}>Sign out</Link>
+        <Link href="/" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white" onClick={()=>{signOut()}}> Sign out </Link>
       </li>
     </ul>
 </div>
