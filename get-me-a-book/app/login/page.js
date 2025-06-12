@@ -1,8 +1,15 @@
 "use client"
 import React from 'react'
 import { useSession, signIn, signOut } from 'next-auth/react';
+import {useRouter} from 'next/navigation';
 
-const page = () => {
+const Login = () => {
+    const {data: session} = useSession()
+
+    if(session){
+        const router = useRouter()
+        router.push('/dashboard')
+    }
     return (
         <div classNameName='text-black container mx-auto'>
             <h1 className='text-center font-bold text-3xl py-10'>Login to Get your fans to support you</h1>
@@ -36,7 +43,8 @@ const page = () => {
                             <span>Continue with Facebook</span>
                         </button>
 
-                        <button class="flex items-center w-full bg-white border border-gray-300 rounded-lg shadow-md px-6 py-3 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                        <button class="flex items-center w-full bg-white border border-gray-300 rounded-lg shadow-md px-6 py-3 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        onClick={()=>signIn("github")}>
                             <svg class="h-6 w-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 73 73">
                                 <rect x="1" y="1" width="70" height="70" rx="14" fill="#000" />
                                 <path fill="#fff" d="M36.5 14C24.4 14 14.5 24.2 14.5 36.4c0 9.9 6.3 18.3 15.1 21.2 1.1.2 1.5-.5 1.5-1.1v-3.8c-6.2 1.3-7.6-2.6-7.6-2.6-1-2.5-2.4-3.1-2.4-3.1-2-1.3.1-1.3.1-1.3 2.2.1 3.3 2.3 3.3 2.3 2 3.3 5.2 2.3 6.5 1.8.2-1.5.8-2.3 1.4-2.9-4.9-.6-10-2.5-10-11.1 0-2.4.9-4.4 2.3-5.9-.2-.6-1-3 .2-6.2 0 0 1.9-.6 6.3 2.3 1.8-.5 3.7-.8 5.6-.8s3.8.3 5.6.8c4.4-2.9 6.3-2.3 6.3-2.3 1.2 3.2.4 5.6.2 6.2 1.4 1.5 2.3 3.5 2.3 5.9 0 8.6-5.1 10.5-10 11.1.9.8 1.5 2.1 1.5 4.2v6.2c0 .6.4 1.3 1.5 1.1 8.8-2.9 15.1-11.3 15.1-21.2 0-12.2-9.9-22.4-22-22.4z" />
@@ -50,4 +58,4 @@ const page = () => {
             )
 }
 
-            export default page
+            export default Login
