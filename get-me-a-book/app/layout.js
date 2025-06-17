@@ -14,7 +14,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-white bg-[radial-gradient(rgba(120,119,198,0.3),rgba(255,255,255,0))] text-black">
+      <body className="bg-white bg-[radial-gradient(rgba(120,119,198,0.3),rgba(255,255,255,0))] text-black">
         <SessionWrapper>
           <Navbar />
           <div className="min-h-screen bg-white bg-[radial-gradient(rgba(120,119,198,0.3),rgba(255,255,255,0))] text-black">
