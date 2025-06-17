@@ -1,8 +1,8 @@
 "use client"
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect} from 'react'
 import { useSession, signIn, signOut } from "next-auth/react"
 import { useRouter } from 'next/navigation'
-//import { fetchuser, updateProfile } from '@/actions/useractions'
+import { fetchuser, updateProfile } from '@/actions/useractions'
 //import { ToastContainer, toast } from 'react-toastify';
 //import 'react-toastify/dist/ReactToastify.css';
 //import { Bounce } from 'react-toastify';
@@ -13,23 +13,32 @@ const Dashboard = () => {
     const [form, setform] = useState({})
 
     useEffect(() => {
-        console.log(session)
-
+        getData()
         if (!session) {
             router.push('/login')
         }
-    }, [])
+    }, [router, session])
 
+    const getData = async () => {
+        let u = await fetchuser(session.user.name)
+        setform(u)
+    }
    
     const handleChange = (e) => {
         setform({ ...form, [e.target.name]: e.target.value })
     }
+
+    const handleSubmit = async (e) => {
+        let a = await updateProfile(e, session.user.name)
+        alert("Profil Updated")
+    }
+
     return (
         <>
             <div className='container mx-auto py-5 px-6 '>
                 <h1 className='text-center my-5 text-3xl font-bold'>Welcome to your Dashboard</h1>
 
-                <form className="max-w-2xl mx-auto" >
+                <form className="max-w-2xl mx-auto" action={handleSubmit}>
 
                     <div className='my-2'>
                         <label htmlFor="name" className="block mb-2 text-sm font-medium  text-black">Name</label>
@@ -45,15 +54,15 @@ const Dashboard = () => {
                         <label htmlFor="username" className="block mb-2 text-sm font-medium text-black">Username</label>
                         <input value={form.username ? form.username : ""} onChange={handleChange} type="text" name='username' id="username" className="block w-full p-2 rounded-lg bg-slate-300" />
                     </div>
-                    {/* input for profile picture of input type text */}
+                    {/* input for profilepic picture of input type text */}
                     <div className="my-2">
-                        <label htmlFor="profilepic" className="block mb-2 text-sm font-medium text-black">Profile Picture</label>
+                        <label htmlFor="profilepic" className="block mb-2 text-sm font-medium text-black">profilepic Picture</label>
                         <input value={form.profilepic ? form.profilepic : ""} onChange={handleChange} type="text" name='profilepic' id="profilepic" className="block w-full p-2 rounded-lg bg-slate-300" />
                     </div>
 
-                    {/* input for cover pic  */}
+                    {/* input for coverpicpic pic  */}
                     <div className="my-2">
-                        <label htmlFor="coverpic" className="block mb-2 text-sm font-medium text-black">Cover Picture</label>
+                        <label htmlFor="coverpic" className="block mb-2 text-sm font-medium text-black">coverpicpic Picture</label>
                         <input value={form.coverpic ? form.coverpic : ""} onChange={handleChange} type="text" name='coverpic' id="coverpic" className="block w-full p-2 rounded-lg bg-slate-300" />
                     </div>
                     {/* input razorpay id */}

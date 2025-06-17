@@ -1,15 +1,29 @@
 "use client"
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Script from 'next/script'
-import { initiate } from '@/actions/useractions'
 import { useSession } from 'next-auth/react'
+import { fetchuser, fetchpayments, initiate} from '@/actions/useractions'
 
 const PaymentPage = ({username}) => {
     const [paymentform, setPaymentform] = useState({name: "", message: "", amount: ""})
+    const [currentUser, setcurrentUser] = useState({})
+    const [payments, setPayments] = useState([])
+
+    useEffect(() => {
+        getData()
+    }, [])
 
     const handleChange = (e) => {
         setPaymentform({ ...paymentform, [e.target.name]: e.target.value })
     }
+
+    const getData = async (params) => {
+        let u = await fetchuser(username);
+        setcurrentUser(u);
+        let dbpayments = await fetchpayments(username);
+        setPayments(dbpayments);
+    }
+
     const pay = async (amount) => {
         // Get the order Id 
         let a = await initiate(amount, username, paymentform)
@@ -65,36 +79,14 @@ const PaymentPage = ({username}) => {
                         <div className="supporters w-1/2 bg-slate-300 rounded-lg text-black p-8">
                             <h2 className='text-2xl font-bold'>Supporters</h2>
                             <ul className='mx-5 text-lg'>
-                                <li className="my-2 flex gap-2 items-center">
+                                {payments.map((p, i) => {
+                                return <li className="my-2 flex gap-2 items-center">
                                     <img className="rounded-full" width={30} src="avatar.gif" alt="user avatar" />
                                     <span>
-                                        Shubham donated <span className='font-bold'>$30</span> with a message "I support U Bro.."
+                                        {p.name} donated <span className='font-bold'>₹{p.amount/100}</span> with a message "{p.message}"
                                     </span>
                                 </li>
-                                <li className="my-2 flex gap-2 items-center">
-                                    <img className="rounded-full" width={30} src="avatar.gif" alt="user avatar" />
-                                    <span>
-                                        Shubham donated <span className='font-bold'>$30</span> with a message "I support U Bro.."
-                                    </span>
-                                </li>
-                                <li className="my-2 flex gap-2 items-center">
-                                    <img className="rounded-full" width={30} src="avatar.gif" alt="user avatar" />
-                                    <span>
-                                        Shubham donated <span className='font-bold'>$30</span> with a message "I support U Bro.."
-                                    </span>
-                                </li>
-                                <li className="my-2 flex gap-2 items-center">
-                                    <img className="rounded-full" width={30} src="avatar.gif" alt="user avatar" />
-                                    <span>
-                                        Shubham donated <span className='font-bold'>$30</span> with a message "I support U Bro.."
-                                    </span>
-                                </li>
-                                <li className="my-2 flex gap-2 items-center">
-                                    <img className="rounded-full" width={30} src="avatar.gif" alt="user avatar" />
-                                    <span>
-                                        Shubham donated <span className='font-bold'>$30</span> with a message "I support U Bro.."
-                                    </span>
-                                </li>
+                                })}
                             </ul>
                         </div>
 
@@ -104,7 +96,7 @@ const PaymentPage = ({username}) => {
                                 <input onChange={handleChange} value={paymentform.name} name='name' type="text" className='w-full p-3 rounded-lg bg-slate-500' placeholder='Enter Name' />
                                 <input onChange={handleChange} value={paymentform.message} name='message' type="text" className='w-full p-3 rounded-lg bg-slate-500' placeholder='Enter Message' />
                                 <input onChange={handleChange} value={paymentform.amount} name="amount" type="text" className='w-full p-3 rounded-lg bg-slate-500' placeholder='Enter Amount' />
-                                <button className="text-white bg-gradient-to-br from-purple-800 to-blue-800 
+                                <button onClick={() => pay(Number.parseInt(paymentform.amount)*100)} className="text-white bg-gradient-to-br from-purple-800 to-blue-800 
             hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300
              dark:focus:ring-blue-800 font-bold rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2">Pay</button>
                             </div>

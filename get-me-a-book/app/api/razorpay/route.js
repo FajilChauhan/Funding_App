@@ -5,9 +5,8 @@ import connectDb from "@/db/connectDb";
 
 export const POST = async (req) => {
   await connectDb();
-
-  let body = await req.formData();
-  body = Object.fromEntries(body); // ✅ Corrected line
+    const formData = await req.formData();
+    const body = Object.fromEntries(formData); // ✅ Corrected line
 
   let p = await Payment.findOne({ oid: body.razorpay_order_id });
 
