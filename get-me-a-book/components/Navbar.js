@@ -2,34 +2,60 @@
 import React, { useState } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const Navbar = () => {
   const { data: session } = useSession();
   const [showdropdown, setShowdropdown] = useState(false);
+  const [searchUser, setSearchUser] = useState('');
+  const router = useRouter();
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchUser.trim()) {
+      router.push(`/${searchUser.trim()}`);
+      setSearchUser('');
+    }
+  };
 
   return (
     <nav className='bg-blue-300 text-black flex justify-between items-center px-4 h-16'>
       {/* Logo */}
       <div>
         <Link className="logo font-bold text-lg flex justify-center items-center" href="/">
-          <img src="book.webp" width={30} alt="Logo" />
+          <img src="/book.webp" width={30} alt="Logo" />
           <span className="ml-2">Getme-A-Book!</span>
         </Link>
       </div>
 
+      {/* Search bar */}
+      <form onSubmit={handleSearch} className="flex items-center space-x-2">
+        <input
+          type="text"
+          placeholder="Search username..."
+          value={searchUser}
+          onChange={(e) => setSearchUser(e.target.value)}
+          className="px-3 py-1 rounded border border-gray-300 focus:outline-none focus:ring focus:border-blue-500"
+        />
+        <button
+          type="submit"
+          className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 text-sm"
+        >
+          Search
+        </button>
+      </form>
+
       {/* Right section */}
-      <div className='relative'>
+      <div className='relative flex items-center'>
         {session && (
           <>
             {/* Dropdown Button */}
             <button
               onClick={() => setShowdropdown(!showdropdown)}
-              id="dropdownDefaultButton"
-              className="text-white mx-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800"
-              type="button"
+              className="text-white mx-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4"
             >
               Welcome {session.user.name}
-              <svg className="w-2.5 h-2.5 ms-3 ml-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 10 6">
+              <svg className="w-2.5 h-2.5 ml-2" aria-hidden="true" fill="none" viewBox="0 0 10 6">
                 <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m1 1 4 4 4-4" />
               </svg>
             </button>
@@ -37,23 +63,19 @@ const Navbar = () => {
             {/* Dropdown Menu */}
             <div
               onMouseLeave={() => setShowdropdown(false)}
-              className={`z-10 ${showdropdown ? "" : "hidden"} absolute left-[15px] top-12 bg-white divide-y divide-gray-100 rounded-lg shadow w-44 dark:bg-gray-700`}
+              className={`z-10 ${showdropdown ? "" : "hidden"} absolute left-[15px] top-12 bg-white divide-y divide-gray-100 rounded-lg shadow w-44`}
             >
-              <ul className="py-2 text-sm text-gray-700 dark:text-gray-200" aria-labelledby="dropdownDefaultButton">
+              <ul className="py-2 text-sm text-gray-700">
                 <li>
-                  <Link href="/dashboard" className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                    Dashboard
-                  </Link>
+                  <Link href="/dashboard" className="block px-4 py-2 hover:bg-gray-100">Dashboard</Link>
                 </li>
                 <li>
-                  <Link href={`/${session.user.name}`} className="block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white">
-                    Your Page
-                  </Link>
+                  <Link href={`/${session.user.name}`} className="block px-4 py-2 hover:bg-gray-100">Your Page</Link>
                 </li>
                 <li>
                   <button
                     onClick={() => signOut()}
-                    className="w-full text-left block px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-600 dark:hover:text-white"
+                    className="w-full text-left block px-4 py-2 hover:bg-gray-100"
                   >
                     Sign out
                   </button>
@@ -63,24 +85,10 @@ const Navbar = () => {
           </>
         )}
 
-        {/* Logout Button (optional extra button) */}
-        {session && (
-          <button
-            type="button"
-            className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-            onClick={() => signOut()}
-          >
-            Logout
-          </button>
-        )}
-
         {/* Login Button */}
         {!session && (
           <Link href="/login">
-            <button
-              type="button"
-              className="text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-            >
+            <button className="ml-4 text-white bg-gradient-to-br from-purple-600 to-blue-500 px-5 py-2.5 rounded-lg text-sm">
               Login
             </button>
           </Link>
