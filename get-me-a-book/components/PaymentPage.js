@@ -1,4 +1,5 @@
 "use client";
+
 import React, { useState, useEffect } from 'react';
 import Script from 'next/script';
 import { useSession } from 'next-auth/react';
@@ -10,22 +11,17 @@ import { Bounce } from 'react-toastify';
 
 const PaymentPage = ({ username }) => {
     const [paymentform, setPaymentform] = useState({ name: "", message: "", amount: "" });
-    const [currentUser, setCurrentUser] = useState({});
+    const [currentUser, setCurrentUser] = useState(null);
     const [payments, setPayments] = useState([]);
     const [totalAmount, setTotalAmount] = useState(0);
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
 
     useEffect(() => {
-        // Always try to get user data by username from URL
+        if (!username) return;
         getData();
-
-        // If the viewer is not logged in, don't do anything else
-        if (status === "unauthenticated") return;
-
-        // You can still do logged-in specific stuff here if needed
-    }, [status, session]);
+    }, [username, session]);
 
     useEffect(() => {
         if (searchParams.get("paymentdone") === "true") {
@@ -49,53 +45,73 @@ const PaymentPage = ({ username }) => {
     };
 
     const getData = async () => {
-        const u = await fetchuser(username); // always fetch profile user
-        setCurrentUser(u);
+        try {
+            const u = await fetchuser(username);
+            if (!u) {
+                toast.error("User not found");
+                return;
+            }
+            setCurrentUser(u);
 
-        const currentViewerUsername = session?.user?.name;
-        let total = 0;
+            let total = 0;
+            if (u?.type === "receiver") {
+                const dbpayments = await fetchpayments(username);
+                setPayments(dbpayments);
+                total = dbpayments.reduce((acc, p) => acc + p.amount, 0);
+            } else if (session?.user?.name) {
+                const donated = await fetchDonationsMade(session.user.name);
+                setPayments(donated);
+                total = donated.reduce((acc, p) => acc + p.amount, 0);
+            }
 
-        if (u?.type === "receiver") {
-            const dbpayments = await fetchpayments(username);
-            setPayments(dbpayments);
-            total = dbpayments.reduce((acc, p) => acc + p.amount, 0);
-        } else if (currentViewerUsername) {
-            const donated = await fetchDonationsMade(currentViewerUsername);
-            setPayments(donated);
-            total = donated.reduce((acc, p) => acc + p.amount, 0);
+            setTotalAmount(total);
+        } catch (error) {
+            toast.error("Failed to load data");
+            console.error(error);
         }
-
-        setTotalAmount(total);
     };
 
-
     const pay = async (amount) => {
-        let a = await initiate(amount, username, {
-            ...paymentform,
-            from_user: session?.user?.name || "guest"
-        });
-        let orderId = a.id;
+        if (!currentUser?.razorpayid || !currentUser?.razorpaysecret) {
+            toast.error("Receiver has not set up Razorpay details correctly.");
+            return;
+        }
 
-        const options = {
-            key: currentUser.razorpayid,
-            amount: amount,
-            currency: "INR",
-            name: "Get Me A Book",
-            description: "Support a book request",
-            image: "/logo.png",
-            order_id: orderId,
-            callback_url: `${process.env.NEXT_PUBLIC_URL}/api/razorpay`,
-            prefill: {
-                name: paymentform.name || "Guest",
-                email: "example@example.com",
-                contact: "9000090000"
-            },
-            notes: { address: "GetMeABook Office" },
-            theme: { color: "#3399cc" }
-        };
+        try {
+            const response = await initiate(amount, username, {
+                ...paymentform,
+                from_user: session?.user?.name || "guest",
+            });
 
-        const rzp1 = new Razorpay(options);
-        rzp1.open();
+            if (!response?.id) {
+                toast.error("Payment initiation failed.");
+                return;
+            }
+
+            const options = {
+                key: currentUser.razorpayid,
+                amount,
+                currency: "INR",
+                name: "Get Me A Book",
+                description: "Support a book request",
+                image: "/logo.png",
+                order_id: response.id,
+                callback_url: `${process.env.NEXT_PUBLIC_URL}/api/razorpay`,
+                prefill: {
+                    name: paymentform.name || "Guest",
+                    email: "example@example.com",
+                    contact: "9000090000"
+                },
+                notes: { address: "GetMeABook Office" },
+                theme: { color: "#3399cc" }
+            };
+
+            const rzp1 = new Razorpay(options);
+            rzp1.open();
+        } catch (err) {
+            console.error(err);
+            toast.error("Something went wrong while initiating payment.");
+        }
     };
 
     return (
@@ -106,18 +122,17 @@ const PaymentPage = ({ username }) => {
             <div className="top-3 cover w-full bg-red-50 relative">
                 <img
                     className="object-cover w-full h-[60vh]"
-                    src={currentUser?.coverpic || "https://previews.123rf.com/images/yourapechkin/yourapechkin2412/yourapechkin241215714/239379490-a-spacious-library-filled-with-books-showcases-a-glowing-globe-under-a-starry-sky-and-floating.jpg"}
+                    src={currentUser?.coverpic}
                     alt="cover"
                 />
 
                 <div className="absolute -bottom-20 right-[45%] border-black overflow-hidden border-2 rounded-full size-32">
                     <img
                         className="rounded-full object-cover size-32"
-                        src={currentUser?.profilepic || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR4fU1kb6Rdw6c_XB9KVvgZLSn7PzFFT2QeXQ&s"}
+                        src={currentUser?.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg"}
                         alt="profile"
                     />
                 </div>
-
             </div>
 
             <div className="info flex justify-center items-center my-24 flex-col gap-2">
@@ -135,7 +150,7 @@ const PaymentPage = ({ username }) => {
                         </>
                     ) : (
                         <>
-                            Helping with Donations |{" "}
+                            Helping with Donations |{' '}
                             <span className="font-bold text-xl">
                                 Total donated: ₹{totalAmount / 100}
                             </span>
@@ -155,8 +170,8 @@ const PaymentPage = ({ username }) => {
                                     <img className="rounded-full" width={30} src="/avatar.gif" alt="user avatar" />
                                     <span>
                                         {currentUser?.type === "receiver"
-                                            ? `${p.name} donated ₹${p.amount / 100} with message "${p.message}"`
-                                            : `You donated ₹${p.amount / 100} to @${p.to_user} with message "${p.message}"`}
+                                            ? `${p.name} donated ₹${p.amount / 100} with message \"${p.message}\"`
+                                            : `You donated ₹${p.amount / 100} to @${p.to_user} with message \"${p.message}\"`}
                                     </span>
                                 </li>
                             ))}
@@ -169,11 +184,11 @@ const PaymentPage = ({ username }) => {
                             <div className="flex gap-2 flex-col my-5">
                                 <input onChange={handleChange} value={paymentform.name} name='name' type="text" className='w-full p-3 rounded-lg bg-slate-500' placeholder='Enter Name' />
                                 <input onChange={handleChange} value={paymentform.message} name='message' type="text" className='w-full p-3 rounded-lg bg-slate-500' placeholder='Enter Message' />
-                                <input onChange={handleChange} value={paymentform.amount} name="amount" type="text" className='w-full p-3 rounded-lg bg-slate-500' placeholder='Enter Amount' />
+                                <input onChange={handleChange} value={paymentform.amount} name="amount" type="number" className='w-full p-3 rounded-lg bg-slate-500' placeholder='Enter Amount' />
                                 <button onClick={() => pay(Number.parseInt(paymentform.amount) * 100)} className="text-white bg-gradient-to-br from-purple-800 to-blue-800 
                                     hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300
-                                    dark:focus:ring-blue-800 font-bold rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2 disabled:bg-slate-500 disabled:from-purple-300"
-                                    disabled={paymentform.name?.length < 3 || paymentform.message?.length < 4}>
+                                    font-bold rounded-lg text-lg px-5 py-2.5 text-center disabled:bg-slate-500 disabled:from-purple-300"
+                                    disabled={paymentform.name?.length < 3 || paymentform.message?.length < 4 || isNaN(Number(paymentform.amount))}>
                                     Pay
                                 </button>
                             </div>
@@ -181,7 +196,7 @@ const PaymentPage = ({ username }) => {
                                 {[10, 20, 30].map(amt => (
                                     <button key={amt} onClick={() => pay(amt * 100)} className="text-white bg-gradient-to-br from-purple-600 to-blue-600 
                                         hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-100
-                                        dark:focus:ring-blue-800 font-medium rounded-lg text-lg px-5 py-2.5 text-center me-2 mb-2">
+                                        font-medium rounded-lg text-lg px-5 py-2.5 text-center">
                                         Pay ₹{amt}
                                     </button>
                                 ))}

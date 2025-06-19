@@ -4,6 +4,7 @@ import Razorpay from "razorpay"
 import User from "@/models/User"
 import Payment from "@/models/Payment"
 import connectDb from "@/db/connectDb"
+import { GET } from "@/app/api/user/route"
 
 // 1. Initiate a payment (for receivers)
 export const initiate = async (amount, to_username, paymentform) => {
@@ -36,11 +37,23 @@ export const initiate = async (amount, to_username, paymentform) => {
 }
 
 // 2. Fetch user data by username
-export const fetchuser = async (username) => {
-  await connectDb()
-  const u = await User.findOne({ username: username })
-  return u?.toObject({ flattenObjectIds: true }) || null
-}
+export const fetchuser = async (identifier) => {
+  try {
+    await connectDb();
+
+    // Try by username first, fallback to email
+    let user = await User.findOne({
+      $or: [{ username: identifier }, { email: identifier }],
+    });
+
+    if (!user) return null;
+
+    return user.toObject({ flattenObjectIds: true });
+  } catch (err) {
+    console.error("Fetch user failed:", err);
+    return null;
+  }
+};
 
 // 3. Fetch payments *received* (to this receiver)
 export const fetchpayments = async (username) => {
@@ -61,17 +74,33 @@ export const fetchDonationsMade = async (username) => {
 }
 
 // 5. Update user profile (name, email, username, description, etc.)
-export const updateProfile = async (data, oldusername) => {
-    await connectDb();
+export const updateProfile = async (formData, originalUsername) => {
+  await connectDb();
 
-    // Check if username is changing
-    if (oldusername !== data.username) {
-        const existing = await User.findOne({ username: data.username });
-        if (existing) return { error: "Username already exists" };
-    }
+  const existingUser = await User.findOne({ username: originalUsername });
+  if (!existingUser) return { success: false, error: "User not found" };
 
-    const result = await User.updateOne({ username: oldusername }, data); // ✅ safer
-    console.log("Updated User:", result);
+  if (formData.username !== originalUsername) {
+    const usernameTaken = await User.findOne({ username: formData.username });
+    if (usernameTaken) return { success: false, error: "Username already taken" };
+  }
 
-    return { success: true };
+  if (formData.type === "receiver" && (!formData.razorpayid || !formData.razorpaysecret)) {
+    return { success: false, error: "Receiver must provide Razorpay credentials" };
+  }
+
+  Object.assign(existingUser, {
+    name: formData.name,
+    email: formData.email,
+    username: formData.username,
+    type: formData.type,
+    profilepic: formData.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg",
+    coverpic: formData.coverpic || "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?fit=crop&w=1350&q=80",
+    description: formData.description || "",
+    razorpayid: formData.type === "receiver" ? formData.razorpayid : undefined,
+    razorpaysecret: formData.type === "receiver" ? formData.razorpaysecret : undefined,
+  });
+
+  await existingUser.save();
+  return { success: true };
 };

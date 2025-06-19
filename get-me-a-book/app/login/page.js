@@ -17,7 +17,8 @@ const Login = () => {
                 <div class="flex flex-col items-center justify-center my-0">
                     <div class="flex flex-col gap-4">
 
-                        <button class="flex items-center w-full bg-white border border-gray-300 rounded-lg shadow-md px-6 py-3 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500">
+                        <button class="flex items-center w-full bg-white border border-gray-300 rounded-lg shadow-md px-6 py-3 text-sm font-medium text-gray-800 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                        onClick={()=>signIn("github")}>
                             <svg class="h-6 w-6 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="-0.5 0 48 48">
                                 <g fill="none" fill-rule="evenodd">
                                     <path fill="#FBBC05" d="M9.83,24c0-1.52.25-2.98.7-4.36L2.62,13.6C1.08,16.73.21,20.26.21,24s.87,7.26,2.41,10.39l7.9-6.05C10.08,26.97,9.83,25.52,9.83,24" />

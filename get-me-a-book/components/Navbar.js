@@ -35,11 +35,11 @@ const Navbar = () => {
           placeholder="Search username..."
           value={searchUser}
           onChange={(e) => setSearchUser(e.target.value)}
-          className="px-3 py-1 rounded border border-gray-300 focus:outline-none focus:ring focus:border-blue-500"
+          className="px-6 py-2 rounded border border-gray-300 focus:outline-none focus:ring focus:border-blue-500"
         />
         <button
           type="submit"
-          className="bg-purple-600 text-white px-3 py-1 rounded hover:bg-purple-700 text-sm"
+          className= "px-5 py-2.5 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm"
         >
           Search
         </button>
@@ -52,7 +52,7 @@ const Navbar = () => {
             {/* Dropdown Button */}
             <button
               onClick={() => setShowdropdown(!showdropdown)}
-              className="text-white mx-4 font-medium rounded-lg text-sm px-5 py-2.5 text-center inline-flex items-center bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4"
+              className="text-white mx-4 px-5 py-2.5 text-center inline-flex items-center bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm"
             >
               Welcome {session.user.name}
               <svg className="w-2.5 h-2.5 ml-2" aria-hidden="true" fill="none" viewBox="0 0 10 6">
@@ -68,6 +68,9 @@ const Navbar = () => {
               <ul className="py-2 text-sm text-gray-700">
                 <li>
                   <Link href="/dashboard" className="block px-4 py-2 hover:bg-gray-100">Dashboard</Link>
+                </li>
+                <li>
+                  <Link href="/feed" className="block px-4 py-2 hover:bg-gray-100">Feed</Link>
                 </li>
                 <li>
                   <Link href={`/${session.user.name}`} className="block px-4 py-2 hover:bg-gray-100">Your Page</Link>
@@ -88,7 +91,7 @@ const Navbar = () => {
         {/* Login Button */}
         {!session && (
           <Link href="/login">
-            <button className="ml-4 text-white bg-gradient-to-br from-purple-600 to-blue-500 px-5 py-2.5 rounded-lg text-sm">
+            <button className="ml-4 px-5 py-2.5 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm">
               Login
             </button>
           </Link>
