@@ -1,39 +1,49 @@
-import { NextResponse } from "next/server"; 
-import connectDb from "@/db/connectDb"; 
-import User from "@/models/User"; 
-import { fetchpayments } from "@/actions/useractions";
 
-// Disable caching entirely export const dynamic = "force-dynamic"; // This forces the route to be SSR every time
+export const dynamic = 'force-dynamic'; // ✅ Required for fresh data every request
 
-export const GET = async () => { await connectDb(); const users = await User.find().lean();
+import { NextResponse } from "next/server";
+import connectDb from "@/db/connectDb";
+import User from "@/models/User";
+import Payment from "@/models/Payment";
 
-const result = await Promise.all( users.map(async (user) => { let totalReceived = 0; let totalDonated = 0;
+export const GET = async () => {
+  await connectDb();
+  const users = await User.find().lean();
 
-const payments = await fetchpayments(user.username);
+  const result = await Promise.all(users.map(async (user) => {
+    const payments = await Payment.find({}).lean();
 
-  if (user.type === "receiver") {
-    totalReceived = payments.reduce((sum, p) => sum + p.amount, 0);
-  }
+    let totalReceived = 0;
+    let totalDonated = 0;
 
-  if (user.type === "donater") {
-    totalDonated = payments
-      .filter((p) => p.from_user === user.username)
-      .reduce((sum, p) => sum + p.amount, 0);
-  }
+    if (user.type === "receiver") {
+      totalReceived = payments
+        .filter(p => p.to_user === user.username)
+        .reduce((sum, p) => sum + p.amount, 0);
+    }
 
-  return {
-    _id: user._id.toString(),
-    username: user.username,
-    profilepic: user.profilepic || "",
-    description: user.description || "",
-    type: user.type,
-    totalReceived,
-    totalDonated,
-  };
-})
+    if (user.type === "donater") {
+      totalDonated = payments
+        .filter(p => p.name === user.username)
+        .reduce((sum, p) => sum + p.amount, 0);
+    }
 
-);
+    return {
+      _id: user._id.toString(),
+      username: user.username,
+      profilepic: user.profilepic || "",
+      description: user.description || "",
+      type: user.type,
+      totalAmount: user.type === 'receiver' ? totalReceived : totalDonated
+    };
+  }));
 
-return new NextResponse(JSON.stringify({ users: result }), { status: 200, headers: { "Cache-Control": "no-store", "Content-Type": "application/json", }, }); };
+  return new Response(JSON.stringify({ users: result }), {
+    headers: {
+      "Content-Type": "application/json",
+      "Cache-Control": "no-store"
+    }
+  });
+};
 
 
