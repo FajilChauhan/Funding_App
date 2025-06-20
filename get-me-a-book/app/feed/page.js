@@ -3,73 +3,62 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { fetchpayments } from "@/actions/useractions";
+import { fetchpayments, fetchDonationsMade } from "@/actions/useractions";
 
-const Feed = () => {
+export default function Feed() {
   const [users, setUsers] = useState([]);
   const [amounts, setAmounts] = useState({});
-  const { data: session } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const res = await fetch("/api/feed", { cache: "no-store" }); // No cache
+    (async () => {
+      const res = await fetch("/api/feed", { cache: "no-store" });
       const data = await res.json();
-      if (data && Array.isArray(data.users)) {
-        setUsers(data.users);
-        await calculateAmounts(data.users);
-      }
-    };
-    fetchUsers();
+      const userList = Array.isArray(data.users) ? data.users : [];
+      setUsers(userList);
+      calculateAmounts(userList);
+    })();
   }, []);
 
   const calculateAmounts = async (userList) => {
-    const updated = {};
-    for (const user of userList) {
-      const payments = await fetchpayments(user.username);
+    const newAmounts = {};
+    for (let user of userList) {
       let total = 0;
-
       if (user.type === "receiver") {
-        total = payments.reduce((acc, p) => acc + (p.to_user === user.username ? p.amount : 0), 0);
-      } else if (user.type === "donater") {
-        total = payments.reduce((acc, p) => acc + (p.from_user === user.username ? p.amount : 0), 0);
+        const p = await fetchpayments(user.username);
+        total = p.reduce((acc, pay) => acc + (pay.amount || 0), 0);
+      } else {
+        const d = await fetchDonationsMade(user.username);
+        total = d.reduce((acc, pay) => acc + (pay.amount || 0), 0);
       }
-
-      updated[user._id] = total;
+      newAmounts[user._id] = total;
     }
-    setAmounts(updated);
-  };
-
-  const handleClick = (username) => {
-    router.push(`/${username}`);
+    setAmounts(newAmounts);
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen py-10 px-4 text-black">
+    <div className="bg-gray-100 min-h-screen py-10 px-4">
       <h1 className="text-3xl font-bold text-center mb-10">The Book Circle</h1>
-      <div className="max-w-6xl mx-auto grid grid-cols-1 gap-6">
+      <div className="max-w-4xl mx-auto space-y-4">
         {users.length === 0 ? (
-          <p className="text-center text-gray-600 col-span-full">No users available right now.</p>
+          <p className="text-center text-gray-600">No users available right now.</p>
         ) : (
-          users.map((user) => (
+          users.map(user => (
             <div
               key={user._id}
-              onClick={() => handleClick(user.username)}
-              className="cursor-pointer bg-white border border-gray-200 rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4 items-center hover:bg-gray-50"
+              onClick={() => router.push(`/${user.username}`)}
+              className="cursor-pointer bg-white p-4 rounded-lg shadow hover:bg-gray-50 flex items-center gap-4"
             >
               <img
                 src={user.profilepic || "/default-profile.jpg"}
-                alt="Profile"
-                className="w-20 h-20 rounded-full object-cover"
+                alt={user.username}
+                className="w-16 h-16 rounded-full object-cover"
               />
-              <div className="text-center sm:text-left">
-                <p className="font-bold text-lg text-blue-700 break-words">@{user.username}</p>
-                {user.type === "receiver" && (
-                  <p className="text-gray-600 text-sm">{user.description || "No description provided."}</p>
-                )}
+              <div>
+                <p className="font-bold text-blue-700">@{user.username}</p>
+                {user.type === "receiver" && <p className="text-gray-600">{user.description}</p>}
                 <p className={`mt-1 font-medium ${user.type === "receiver" ? "text-green-700" : "text-purple-700"}`}>
-                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹
-                  {((amounts[user._id] || 0) / 100).toFixed(2)}
+                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{((amounts[user._id] || 0) / 100).toFixed(2)}
                 </p>
               </div>
             </div>
