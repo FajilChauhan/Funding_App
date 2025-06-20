@@ -20,7 +20,6 @@ export const GET = async () => {
       }
 
       if (user.type === "donater") {
-        // user.username is donor in `from_user`, so filter accordingly
         totalDonated = payments
           .filter((p) => p.from_user === user.username)
           .reduce((sum, p) => sum + p.amount, 0);
@@ -38,5 +37,5 @@ export const GET = async () => {
     })
   );
 
-  return NextResponse.json({ users: result });
+  return NextResponse.json({ users: result }); // ✅ Return the enriched `result`
 };

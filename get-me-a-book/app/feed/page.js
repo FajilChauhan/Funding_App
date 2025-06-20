@@ -7,48 +7,50 @@ import { fetchpayments, fetchDonationsMade } from "@/actions/useractions";
 
 const Feed = () => {
   const [users, setUsers] = useState([]);
-  const [amounts, setAmounts] = useState({});
+  const [loading, setLoading] = useState(true);
   const { data: session } = useSession();
   const router = useRouter();
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await fetch("/api/feed");
-      const data = await res.json();
+      try {
+        const res = await fetch("/api/feed");
+        const data = await res.json();
 
-      let userList = [];
-      if (Array.isArray(data)) {
-        userList = data;
-      } else if (Array.isArray(data.users)) {
-        userList = data.users;
+        let userList = [];
+        if (Array.isArray(data)) {
+          userList = data;
+        } else if (Array.isArray(data.users)) {
+          userList = data.users;
+        }
+
+        // Now add totalAmount to each user
+        const enrichedUsers = await Promise.all(
+          userList.map(async (user) => {
+            let totalAmount = 0;
+
+            if (user.type === "receiver") {
+              const payments = await fetchpayments(user.username);
+              totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
+            } else if (user.type === "donater") {
+              const donations = await fetchDonationsMade(user.username);
+              totalAmount = donations.reduce((sum, p) => sum + p.amount, 0);
+            }
+
+            return { ...user, totalAmount };
+          })
+        );
+
+        setUsers(enrichedUsers);
+        setLoading(false);
+      } catch (error) {
+        console.error("Error loading users:", error);
+        setLoading(false);
       }
-
-      setUsers(userList);
-      await calculateAmounts(userList);
     };
 
     fetchUsers();
   }, []);
-
-  const calculateAmounts = async (userList) => {
-    const updatedAmounts = {};
-
-    for (const user of userList) {
-      let total = 0;
-
-      if (user.type === "receiver") {
-        const dbpayments = await fetchpayments(user.username);
-        total = dbpayments.reduce((acc, p) => acc + p.amount, 0);
-      } else {
-        const donated = await fetchDonationsMade(user.username);
-        total = donated.reduce((acc, p) => acc + p.amount, 0);
-      }
-
-      updatedAmounts[user._id] = total;
-    }
-
-    setAmounts(updatedAmounts);
-  };
 
   const handleClick = (username) => {
     router.push(`/${username}`);
@@ -57,8 +59,11 @@ const Feed = () => {
   return (
     <div className="bg-gray-100 min-h-screen py-10 px-4 text-black">
       <h1 className="text-3xl font-bold text-center mb-10">The Book Circle</h1>
+
       <div className="max-w-6xl mx-auto grid grid-cols-1 gap-6">
-        {users.length === 0 ? (
+        {loading ? (
+          <p className="text-center text-gray-600 col-span-full">Loading users...</p>
+        ) : users.length === 0 ? (
           <p className="text-center text-gray-600 col-span-full">No users available right now.</p>
         ) : (
           users.map((user) => (
@@ -78,7 +83,7 @@ const Feed = () => {
                   <p className="text-gray-600 text-sm">{user.description || "No description provided."}</p>
                 )}
                 <p className={`mt-1 font-medium ${user.type === "receiver" ? "text-green-700" : "text-purple-700"}`}>
-                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{(amounts[user._id] || 0) / 100}
+                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{(user.totalAmount || 0) / 100}
                 </p>
               </div>
             </div>

@@ -123,7 +123,7 @@ const PaymentPage = ({ username }) => {
             <div className="top-3 cover w-full bg-red-50 relative">
                 <img
                     className="object-cover w-full h-[60vh]"
-                    src={currentUser?.coverpic}
+                    src={currentUser?.coverpic || ""}
                     alt="cover"
                 />
                 <div className="absolute -bottom-20 right-1/2 translate-x-1/2 border-black overflow-hidden border-2 rounded-full size-32">
