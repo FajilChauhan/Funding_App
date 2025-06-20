@@ -1,4 +1,3 @@
-// /app/api/feed/route.js
 import { NextResponse } from "next/server";
 import connectDb from "@/db/connectDb";
 import User from "@/models/User";
@@ -37,5 +36,11 @@ export const GET = async () => {
     })
   );
 
-  return NextResponse.json({ users: result }); // ✅ Return the enriched `result`
+  return new NextResponse(JSON.stringify({ users: result }), {
+    status: 200,
+    headers: {
+      "Cache-Control": "no-store",
+      "Content-Type": "application/json",
+    },
+  });
 };
