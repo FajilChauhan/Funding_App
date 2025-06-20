@@ -3,46 +3,24 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { fetchpayments, fetchDonationsMade } from "@/actions/useractions";
 
 const Feed = () => {
   const [users, setUsers] = useState([]);
-  const [amounts, setAmounts] = useState({});
   const { data: session } = useSession();
   const router = useRouter();
 
   useEffect(() => {
-  const fetchUsers = async () => {
-    const res = await fetch("/api/feed", { cache: "no-store" }); // ✅ force no caching
-    const data = await res.json();
+    const fetchUsers = async () => {
+      const res = await fetch("/api/feed", { cache: "no-store" }); // ✅ no caching
+      const data = await res.json();
 
-    if (data && Array.isArray(data.users)) {
-      setUsers(data.users);
-    }
-  };
-
-  fetchUsers();
-}, []);
-
-  const calculateAmounts = async (userList) => {
-    const updatedAmounts = {};
-
-    for (const user of userList) {
-      let total = 0;
-
-      if (user.type === "receiver") {
-        const payments = await fetchpayments(user.username);
-        total = payments.reduce((acc, p) => acc + p.amount, 0);
-      } else if (user.type === "donater") {
-        const donations = await fetchDonationsMade(user.username);
-        total = donations.reduce((acc, p) => acc + p.amount, 0);
+      if (data && Array.isArray(data.users)) {
+        setUsers(data.users);
       }
+    };
 
-      updatedAmounts[user._id] = total;
-    }
-
-    setAmounts(updatedAmounts);
-  };
+    fetchUsers();
+  }, []);
 
   const handleClick = (username) => {
     router.push(`/${username}`);
@@ -72,7 +50,7 @@ const Feed = () => {
                   <p className="text-gray-600 text-sm">{user.description || "No description provided."}</p>
                 )}
                 <p className={`mt-1 font-medium ${user.type === "receiver" ? "text-green-700" : "text-purple-700"}`}>
-                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{(user.totalAmount || 0) / 100}}
+                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{(user.totalAmount || 0) / 100}
                 </p>
               </div>
             </div>
