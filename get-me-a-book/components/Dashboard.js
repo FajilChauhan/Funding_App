@@ -12,14 +12,6 @@ const Dashboard = () => {
   const router = useRouter();
   const [form, setForm] = useState({});
 
-  useEffect(() => {
-    if (status === "unauthenticated") {
-      router.push("/login");
-    } else if (status === "authenticated") {
-      loadUserData();
-    }
-  }, [status]);
-
   const loadUserData = async () => {
     try {
       const userData = await fetchuser(session.user.email);
@@ -43,6 +35,14 @@ const Dashboard = () => {
       toast.error("Failed to load user data.");
     }
   };
+
+  useEffect(() => {
+    if (status === "unauthenticated") {
+      router.push("/login");
+    } else if (status === "authenticated") {
+      loadUserData();
+    }
+  }, [status]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -116,7 +116,7 @@ const Dashboard = () => {
                 required
                 isImportant
               />
-            
+
               <InputField
                 label="Razorpay Secret"
                 name="razorpaysecret"
@@ -175,11 +175,15 @@ const InputField = ({ label, name, value, onChange, type = "text", required = fa
 );
 
 const HelperText = () => (
-  <p className="text-xs text-red-600 mb-2">* Make sure this is your correct Razorpay <span className="font-bold">"ID"</span> and <span className="font-bold">"KEY"</span>.</p>
+  <p className="text-xs text-red-600 mb-2">
+    * Make sure this is your correct Razorpay <span className="font-bold">&quot;ID&quot;</span> and <span className="font-bold">&quot;KEY&quot;</span>.
+  </p>
 );
 
 const HelperPic = () => (
-  <p className="text-xs text-red-600 mb-2">* Make sure Enter Correct <span className="font-bold">"URL"</span> If u want to change Profile/Cover Pic.</p>
+  <p className="text-xs text-red-600 mb-2">
+    * Make sure Enter Correct <span className="font-bold">&quot;URL&quot;</span> If you want to change Profile/Cover Pic.
+  </p>
 );
 
 export default Dashboard;
