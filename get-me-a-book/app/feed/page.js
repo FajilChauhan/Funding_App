@@ -11,11 +11,23 @@ const Feed = () => {
 
   useEffect(() => {
     const fetchUsers = async () => {
-      const res = await fetch("/api/feed", { cache: "no-store" }); // ensures no stale cache
+      const res = await fetch("/api/feed", { cache: "no-store" }); // avoid caching
       const data = await res.json();
 
       if (data && Array.isArray(data.users)) {
-        setUsers(data.users);
+        const updated = data.users.map((user) => {
+          let totalAmount = 0;
+
+          if (user.type === "receiver" && user.totalReceived) {
+            totalAmount = user.totalReceived;
+          } else if (user.type === "donater" && user.totalDonated) {
+            totalAmount = user.totalDonated;
+          }
+
+          return { ...user, totalAmount };
+        });
+
+        setUsers(updated);
       }
     };
 
@@ -47,18 +59,11 @@ const Feed = () => {
               <div className="text-center sm:text-left">
                 <p className="font-bold text-lg text-blue-700 break-words">@{user.username}</p>
                 {user.type === "receiver" && (
-                  <p className="text-gray-600 text-sm">
-                    {user.description || "No description provided."}
-                  </p>
+                  <p className="text-gray-600 text-sm">{user.description || "No description provided."}</p>
                 )}
-                 <p
-  className={`mt-1 font-medium ${
-    user.type === "receiver" ? "text-green-700" : "text-purple-700"
-  }`}
->
-  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹
-  {((user.type === "receiver" ? user.totalReceived || 0 : user.totalDonated || 0) / 100).toFixed(2)}
-</p>
+                <p className={`mt-1 font-medium ${user.type === "receiver" ? "text-green-700" : "text-purple-700"}`}>
+                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{(user.totalAmount || 0) / 100}
+                </p>
               </div>
             </div>
           ))
