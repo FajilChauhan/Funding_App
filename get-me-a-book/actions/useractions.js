@@ -8,19 +8,25 @@ import { GET } from "@/app/api/user/route"
 
 // 1. Initiate a payment (for receivers)
 export const initiate = async (amount, to_username, paymentform) => {
-  await connectDb()
+  await connectDb();
+
+  const receiver = await User.findOne({ username: to_username });
+
+  if (!receiver || !receiver.razorpayid || !receiver.razorpaysecret) {
+    throw new Error("Receiver has not set up Razorpay credentials");
+  }
 
   const instance = new Razorpay({
-    key_id: process.env.NEXT_PUBLIC_KEY_ID,
-    key_secret: process.env.KEY_SECRET,
-  })
+    key_id: receiver.razorpayid,
+    key_secret: receiver.razorpaysecret,
+  });
 
   const options = {
     amount: Number.parseInt(amount),
     currency: "INR",
-  }
+  };
 
-  const order = await instance.orders.create(options)
+  const order = await instance.orders.create(options);
 
   await Payment.create({
     oid: order.id,
@@ -31,10 +37,11 @@ export const initiate = async (amount, to_username, paymentform) => {
     done: false,
     email: paymentform.email || "",
     from_user: paymentform.from_user || "",
-  })
+  });
 
-  return order
-}
+  return order;
+};
+
 
 // 2. Fetch user data by username
 export const fetchuser = async (identifier) => {

@@ -8,18 +8,18 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
   title: "Get Me A Book",
-  description: "Collect Funding For Buy A Book For Who is not Able to Buy A book",
+  description: "Collect Funding For Buying A Book For Those Who Cannot Afford One",
 };
 
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="bg-white bg-[radial-gradient(rgba(120,119,198,0.3),rgba(255,255,255,0))] text-black">
+      <body className={`${inter.className} bg-white bg-[radial-gradient(rgba(120,119,198,0.3),rgba(255,255,255,0))] text-black min-h-screen flex flex-col`}>
         <SessionWrapper>
           <Navbar />
-          <div className="min-h-screen bg-white bg-[radial-gradient(rgba(120,119,198,0.3),rgba(255,255,255,0))] text-black">
+          <main className="flex-1 w-full">
             {children}
-          </div>
+          </main>
           <Footer />
         </SessionWrapper>
       </body>

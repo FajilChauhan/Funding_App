@@ -73,23 +73,25 @@ const Dashboard = () => {
   return (
     <>
       <ToastContainer />
-      <div className="container mx-auto py-5 px-6">
-        <h1 className="text-center my-5 text-3xl font-bold">
-          Welcome to your Dashboard
-        </h1>
+      <div className="w-full min-h-screen bg-gray-100 px-4 py-6 text-black">
+        <h1 className="text-3xl font-bold text-center mb-6">Welcome to your Dashboard</h1>
 
-        <form className="max-w-2xl mx-auto" onSubmit={handleSubmit}>
+        <form
+          onSubmit={handleSubmit}
+          className="w-full max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md space-y-5"
+        >
           <InputField label="Name" name="name" value={form.name} onChange={handleChange} />
           <InputField label="Email" name="email" type="email" value={form.email} onChange={handleChange} />
           <InputField label="Username" name="username" value={form.username} onChange={handleChange} />
           <InputField label="Profile Picture" name="profilepic" value={form.profilepic} onChange={handleChange} />
           <InputField label="Cover Picture" name="coverpic" value={form.coverpic} onChange={handleChange} />
+          <HelperPic />
 
           <div className="my-2">
             <label className="block mb-2 text-sm font-medium text-black">Type</label>
-            <div className="flex gap-4">
+            <div className="flex flex-wrap gap-4">
               {['donater', 'receiver'].map((type) => (
-                <label key={type} className="flex items-center">
+                <label key={type} className="flex items-center text-sm">
                   <input
                     type="radio"
                     name="type"
@@ -106,8 +108,25 @@ const Dashboard = () => {
 
           {form.type === 'receiver' && (
             <>
-              <InputField label="Razorpay Id" name="razorpayid" value={form.razorpayid} onChange={handleChange} />
-              <InputField label="Razorpay Secret" name="razorpaysecret" value={form.razorpaysecret} onChange={handleChange} />
+              <InputField
+                label="Razorpay ID"
+                name="razorpayid"
+                value={form.razorpayid}
+                onChange={handleChange}
+                required
+                isImportant
+              />
+            
+              <InputField
+                label="Razorpay Secret"
+                name="razorpaysecret"
+                value={form.razorpaysecret}
+                onChange={handleChange}
+                required
+                isImportant
+              />
+              <HelperText />
+
               <div className="my-2">
                 <label htmlFor="description" className="block mb-2 text-sm font-medium text-black">
                   Why do you need this donation?
@@ -116,7 +135,7 @@ const Dashboard = () => {
                   name="description"
                   id="description"
                   rows={4}
-                  className="block w-full p-2 rounded-lg bg-slate-300"
+                  className="w-full p-3 rounded-lg bg-slate-200 focus:outline-none"
                   value={form.description || ''}
                   onChange={handleChange}
                 />
@@ -124,10 +143,10 @@ const Dashboard = () => {
             </>
           )}
 
-          <div className="my-6">
+          <div className="pt-4">
             <button
               type="submit"
-              className="block w-full p-2 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm"
+              className="w-full py-3 text-white bg-gradient-to-br from-purple-600 to-blue-500 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm"
             >
               Save
             </button>
@@ -138,20 +157,29 @@ const Dashboard = () => {
   );
 };
 
-const InputField = ({ label, name, value, onChange, type = "text" }) => (
-  <div className="my-2">
-    <label htmlFor={name} className="block mb-2 text-sm font-medium text-black">
-      {label}
+const InputField = ({ label, name, value, onChange, type = "text", required = false, isImportant = false }) => (
+  <div className="my-2 w-full">
+    <label htmlFor={name} className="block mb-1 text-sm font-medium text-black">
+      {label} {isImportant && <span className="text-red-600">*</span>}
     </label>
     <input
       type={type}
       name={name}
       id={name}
+      required={required}
       value={value || ''}
       onChange={onChange}
-      className="block w-full p-2 rounded-lg bg-slate-300"
+      className="block w-full p-3 rounded-lg bg-slate-200 focus:outline-none"
     />
   </div>
+);
+
+const HelperText = () => (
+  <p className="text-xs text-red-600 mb-2">* Make sure this is your correct Razorpay <span className="font-bold">"ID"</span> and <span className="font-bold">"KEY"</span>.</p>
+);
+
+const HelperPic = () => (
+  <p className="text-xs text-red-600 mb-2">* Make sure Enter Correct <span className="font-bold">"URL"</span> If u want to change Profile/Cover Pic.</p>
 );
 
 export default Dashboard;

@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { fetchpayments, fetchDonationsMade } from "@/actions/useractions";
 
 const Feed = () => {
   const [users, setUsers] = useState([]);
+  const [amounts, setAmounts] = useState({});
   const { data: session } = useSession();
   const router = useRouter();
 
@@ -13,46 +15,70 @@ const Feed = () => {
     const fetchUsers = async () => {
       const res = await fetch("/api/feed");
       const data = await res.json();
-      setUsers(data);
+
+      let userList = [];
+      if (Array.isArray(data)) {
+        userList = data;
+      } else if (Array.isArray(data.users)) {
+        userList = data.users;
+      }
+
+      setUsers(userList);
+      await calculateAmounts(userList);
     };
+
     fetchUsers();
   }, []);
 
-  const handleClick = (username) => {
-    if (!session) {
-      alert("Login required to view profiles.");
-      return;
+  const calculateAmounts = async (userList) => {
+    const updatedAmounts = {};
+
+    for (const user of userList) {
+      let total = 0;
+
+      if (user.type === "receiver") {
+        const dbpayments = await fetchpayments(user.username);
+        total = dbpayments.reduce((acc, p) => acc + p.amount, 0);
+      } else {
+        const donated = await fetchDonationsMade(user.username);
+        total = donated.reduce((acc, p) => acc + p.amount, 0);
+      }
+
+      updatedAmounts[user._id] = total;
     }
+
+    setAmounts(updatedAmounts);
+  };
+
+  const handleClick = (username) => {
     router.push(`/${username}`);
   };
 
   return (
     <div className="bg-gray-100 min-h-screen py-10 px-4 text-black">
-      <h1 className="text-3xl font-bold text-center mb-10">User Feed</h1>
-      <div className="max-w-5xl mx-auto space-y-6">
+      <h1 className="text-3xl font-bold text-center mb-10">The Book Circle</h1>
+      <div className="max-w-6xl mx-auto grid grid-cols-1 gap-6">
         {users.length === 0 ? (
-          <p className="text-center text-gray-600">No users available right now.</p>
+          <p className="text-center text-gray-600 col-span-full">No users available right now.</p>
         ) : (
           users.map((user) => (
             <div
               key={user._id}
               onClick={() => handleClick(user.username)}
-              className="cursor-pointer bg-white border border-gray-200 rounded-lg shadow-md p-5 flex gap-4 items-center hover:bg-gray-50"
+              className="cursor-pointer bg-white border border-gray-200 rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4 items-center hover:bg-gray-50"
             >
               <img
                 src={user.profilepic || "/default-profile.jpg"}
                 alt="Profile"
                 className="w-20 h-20 rounded-full object-cover"
               />
-              <div>
-                <p className="font-bold text-lg text-blue-700">@{user.username}</p>
-                <p className="text-gray-600 text-sm mb-2">
-                  {user.description || "No description."}
-                </p>
-                <p className={`font-semibold ${user.type === "receiver" ? "text-green-700" : "text-purple-700"}`}>
-                  {user.type === "receiver"
-                    ? `Total Received: ₹${user.totalAmount / 100}`
-                    : "Donater Account"}
+              <div className="text-center sm:text-left">
+                <p className="font-bold text-lg text-blue-700 break-words">@{user.username}</p>
+                {user.type === "receiver" && (
+                  <p className="text-gray-600 text-sm">{user.description || "No description provided."}</p>
+                )}
+                <p className={`mt-1 font-medium ${user.type === "receiver" ? "text-green-700" : "text-purple-700"}`}>
+                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{(amounts[user._id] || 0) / 100}
                 </p>
               </div>
             </div>

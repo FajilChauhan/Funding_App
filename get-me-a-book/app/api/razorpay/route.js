@@ -1,29 +1,40 @@
 import { NextResponse } from "next/server";
 import { validatePaymentVerification } from "razorpay/dist/utils/razorpay-utils";
 import Payment from "@/models/Payment";
+import User from "@/models/User";
 import connectDb from "@/db/connectDb";
 
 export const POST = async (req) => {
   await connectDb();
-    const formData = await req.formData();
-    const body = Object.fromEntries(formData); // ✅ Corrected line
+  const formData = await req.formData();
+  const body = Object.fromEntries(formData); // Extract payment data
 
-  let p = await Payment.findOne({ oid: body.razorpay_order_id });
+  // Find payment record by Razorpay order ID
+  const payment = await Payment.findOne({ oid: body.razorpay_order_id });
 
-  if (!p) {
+  if (!payment) {
     return NextResponse.json({ success: false, message: "Order ID not found" });
   }
 
-  let isValid = validatePaymentVerification(
+  // Find the receiver (to_user) from User model
+  const receiver = await User.findOne({ username: payment.to_user });
+
+  if (!receiver || !receiver.razorpaysecret) {
+    return NextResponse.json({ success: false, message: "Receiver credentials not found" });
+  }
+
+  // Validate payment using receiver's own Razorpay secret
+  const isValid = validatePaymentVerification(
     {
       order_id: body.razorpay_order_id,
       payment_id: body.razorpay_payment_id,
     },
     body.razorpay_signature,
-    process.env.KEY_SECRET
+    receiver.razorpaysecret
   );
 
   if (isValid) {
+    // Mark payment as completed
     const updatedPayment = await Payment.findOneAndUpdate(
       { oid: body.razorpay_order_id },
       { done: true },

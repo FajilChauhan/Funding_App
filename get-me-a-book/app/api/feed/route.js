@@ -10,10 +10,20 @@ export const GET = async () => {
 
   const result = await Promise.all(
     users.map(async (user) => {
-      let total = 0;
+      let totalReceived = 0;
+      let totalDonated = 0;
+
+      const payments = await fetchpayments(user.username);
+
       if (user.type === "receiver") {
-        const payments = await fetchpayments(user.username);
-        total = payments.reduce((sum, p) => sum + p.amount, 0);
+        totalReceived = payments.reduce((sum, p) => sum + p.amount, 0);
+      }
+
+      if (user.type === "donater") {
+        // user.username is donor in `from_user`, so filter accordingly
+        totalDonated = payments
+          .filter((p) => p.from_user === user.username)
+          .reduce((sum, p) => sum + p.amount, 0);
       }
 
       return {
@@ -22,10 +32,11 @@ export const GET = async () => {
         profilepic: user.profilepic || "",
         description: user.description || "",
         type: user.type,
-        totalAmount: total,
+        totalReceived,
+        totalDonated,
       };
     })
   );
 
-  return NextResponse.json(result);
+  return NextResponse.json({ users: result });
 };
