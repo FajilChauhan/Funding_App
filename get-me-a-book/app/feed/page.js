@@ -12,23 +12,17 @@ const Feed = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const res = await fetch("/api/feed");
-      const data = await res.json();
+  const fetchUsers = async () => {
+    const res = await fetch("/api/feed", { cache: "no-store" }); // ✅ force no caching
+    const data = await res.json();
 
-      let userList = [];
-      if (Array.isArray(data)) {
-        userList = data;
-      } else if (Array.isArray(data.users)) {
-        userList = data.users;
-      }
+    if (data && Array.isArray(data.users)) {
+      setUsers(data.users);
+    }
+  };
 
-      setUsers(userList);
-      await calculateAmounts(userList);
-    };
-
-    fetchUsers();
-  }, []);
+  fetchUsers();
+}, []);
 
   const calculateAmounts = async (userList) => {
     const updatedAmounts = {};
@@ -78,7 +72,7 @@ const Feed = () => {
                   <p className="text-gray-600 text-sm">{user.description || "No description provided."}</p>
                 )}
                 <p className={`mt-1 font-medium ${user.type === "receiver" ? "text-green-700" : "text-purple-700"}`}>
-                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{(amounts[user._id] || 0) / 100}
+                  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{(user.totalAmount || 0) / 100}}
                 </p>
               </div>
             </div>
