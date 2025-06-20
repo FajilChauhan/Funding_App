@@ -59,12 +59,10 @@ const fetchLeaderboard = async () => {
     .slice(0, 5);
 };
 
-
 export default function Home() {
   const { data: session } = useSession();
   const [users, setUsers] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
-  const [amounts, setAmounts] = useState({});
 
   useEffect(() => {
     fetchFeed().then(setUsers);
@@ -126,6 +124,7 @@ export default function Home() {
       </div>
 
       <div className="bg-black h-1 opacity-10 my-8" />
+
       {/* Leaderboard Section */}
       <div className="w-full py-10 bg-gray-100 px-4">
         <h2 className="text-3xl font-bold text-center mb-8">Meet the Helpers 🧡</h2>
@@ -159,20 +158,19 @@ export default function Home() {
 
         <div className="w-full max-w-5xl bg-white p-6 rounded-lg shadow-md border border-gray-200 text-base">
           <p className="mb-4">
-            <strong>GetMe-A-Book</strong> is a crowdfunding platform dedicated to helping people access the books they need for education.
-            our platform allows you to become a <strong>receiver</strong> to raise funds or a <strong>donater</strong> to support others.
+            <strong>GetMe-A-Book</strong> is a crowdfunding platform dedicated to helping people access the books they need for education. Our platform allows you to become a <strong>receiver</strong> to raise funds or a <strong>donater</strong> to support others.
           </p>
           <p className="mb-4">
-            If you are part of an NGO, you can also create an account and raise funds as a receiver. Or, if you want to donate as an organization, you’re welcome to be a supporter.
+            If you are part of an NGO, you can also create an account and raise funds as a receiver. Or, if you want to donate as an organization, you are welcome to be a supporter.
           </p>
           <p className="mb-4">
-            Our platform is designed for people who want to help those around them. If you know someone nearby who needs help buying a book but you don't have enough funds yourself, you can also raise money on their behalf using our app. It’s all about your effort.
+            Our platform is designed for people who want to help those around them. If you know someone nearby who needs help buying a book but you do not have enough funds yourself, you can also raise money on their behalf using our app. It is all about your effort.
           </p>
           <p className="mb-4">
-            We believe every donation makes a difference. That’s why we’ve built a <strong>leaderboard</strong> that highlights the best donors of the month. The top supporter even gets a small gift from our team — to say thank you for making the world better.
+            We believe every donation makes a difference. That is why we have built a <strong>leaderboard</strong> that highlights the best donors of the month. The top supporter even gets a small gift from our team — to say thank you for making the world better.
           </p>
           <p>
-            To start receiving donations, you’ll need to set up a Razorpay account with your <strong>Razorpay ID</strong> and <strong>Razorpay Secret Key</strong>. You can watch this quick guide to help you:
+            To start receiving donations, you will need to set up a Razorpay account with your <strong>Razorpay ID</strong> and <strong>Razorpay Secret Key</strong>. You can watch this quick guide to help you:
           </p>
 
           <div className="my-4">
@@ -199,7 +197,8 @@ export default function Home() {
         </div>
       </div>
 
-          <div className="bg-black h-1 opacity-10 my-8" />
+      <div className="bg-black h-1 opacity-10 my-8" />
+
       {/* Contact Us Section */}
       <div className="w-full flex flex-col items-center justify-center px-4 mb-16 text-black">
         <h1 className="text-3xl font-bold text-center mb-6">Contact Us</h1>
