@@ -51,20 +51,14 @@ const Feed = () => {
                     {user.description || "No description provided."}
                   </p>
                 )}
-                <p
-                  className={`mt-1 font-medium ${
-                    user.type === "receiver" ? "text-green-700" : "text-purple-700"
-                  }`}
-                >
-                  💸{" "}
-                  {user.type === "receiver"
-                    ? "Total Received"
-                    : "Total Donated"}
-                  : ₹
-                  {(user.type === "receiver"
-                    ? user.totalReceived
-                    : user.totalDonated) / 100}
-                </p>
+                 <p
+  className={`mt-1 font-medium ${
+    user.type === "receiver" ? "text-green-700" : "text-purple-700"
+  }`}
+>
+  💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹
+  {((user.type === "receiver" ? user.totalReceived || 0 : user.totalDonated || 0) / 100).toFixed(2)}
+</p>
               </div>
             </div>
           ))
