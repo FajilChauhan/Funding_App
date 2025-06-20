@@ -123,7 +123,7 @@ const PaymentPage = ({ username }) => {
             <div className="top-3 cover w-full bg-red-50 relative">
                 <img
                     className="object-cover w-full h-[60vh]"
-                    src={currentUser?.coverpic || ""}
+                    src="https://previews.123rf.com/images/yourapechkin/yourapechkin2412/yourapechkin241215714/239379490-a-spacious-library-filled-with-books-showcases-a-glowing-globe-under-a-starry-sky-and-floating.jpg"
                     alt="cover"
                 />
                 <div className="absolute -bottom-20 right-1/2 translate-x-1/2 border-black overflow-hidden border-2 rounded-full size-32">
