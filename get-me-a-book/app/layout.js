@@ -3,6 +3,7 @@ import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import SessionWrapper from "@/components/SessionWrapper";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
     <html lang="en">
       <body className={`${inter.className} bg-white bg-[radial-gradient(rgba(120,119,198,0.3),rgba(255,255,255,0))] text-black min-h-screen flex flex-col`}>
         <SessionWrapper>
+          <SpeedInsights/>
           <Navbar />
           <main className="flex-1 w-full">
             {children}
