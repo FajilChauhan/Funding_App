@@ -54,12 +54,16 @@ const PaymentPage = ({ username }) => {
             setCurrentUser(u);
 
             let total = 0;
-            if (u?.type === "receiver") {
-                const dbpayments = await fetchpayments(username);
+
+            if (u.type === "receiver") {
+                const dbpayments = await fetchpayments(u.email);
                 setPayments(dbpayments);
                 total = dbpayments.reduce((acc, p) => acc + p.amount, 0);
-            } else if (session?.user?.name) {
-                const donated = await fetchDonationsMade(username);
+            }
+
+            // ✅ Show donation history of donaters to *everyone*, login not required
+            else if (u.type === "donater") {
+                const donated = await fetchDonationsMade(u.email);
                 setPayments(donated);
                 total = donated.reduce((acc, p) => acc + p.amount, 0);
             }
@@ -71,6 +75,8 @@ const PaymentPage = ({ username }) => {
         }
     };
 
+
+
     const pay = async (amount) => {
         if (!currentUser?.razorpayid || !currentUser?.razorpaysecret) {
             toast.error("Receiver has not set up Razorpay details correctly.");
@@ -80,7 +86,7 @@ const PaymentPage = ({ username }) => {
         try {
             const response = await initiate(amount, username, {
                 ...paymentform,
-                from_user: session?.user?.name || "guest",
+                from_user: session?.user?.email || "guest",
             });
 
             if (!response?.id) {

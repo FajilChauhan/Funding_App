@@ -1,15 +1,15 @@
-"use server"
+"use server";
 
-import Razorpay from "razorpay"
-import User from "@/models/User"
-import Payment from "@/models/Payment"
-import connectDb from "@/db/connectDb"
-import { GET } from "@/app/api/user/route"
+import Razorpay from "razorpay";
+import User from "@/models/User";
+import Payment from "@/models/Payment";
+import connectDb from "@/db/connectDb";
 
 // 1. Initiate a payment (for receivers)
 export const initiate = async (amount, to_username, paymentform) => {
   await connectDb();
 
+  // 🔍 Get the receiver user by username
   const receiver = await User.findOne({ username: to_username });
 
   if (!receiver || !receiver.razorpayid || !receiver.razorpaysecret) {
@@ -28,28 +28,27 @@ export const initiate = async (amount, to_username, paymentform) => {
 
   const order = await instance.orders.create(options);
 
+  // ✅ Store emails instead of usernames
   await Payment.create({
     oid: order.id,
     amount: amount,
-    to_user: to_username,
+    to_user: receiver.email, // receiver's email
     name: paymentform.name,
     message: paymentform.message,
     done: false,
     email: paymentform.email || "",
-    from_user: paymentform.from_user || "",
+    from_user: paymentform.from_user || "", // sender's email
   });
 
   return order;
 };
 
-
-// 2. Fetch user data by username
+// 2. Fetch user data by username OR email
 export const fetchuser = async (identifier) => {
   try {
     await connectDb();
 
-    // Try by username first, fallback to email
-    let user = await User.findOne({
+    const user = await User.findOne({
       $or: [{ username: identifier }, { email: identifier }],
     });
 
@@ -62,40 +61,43 @@ export const fetchuser = async (identifier) => {
   }
 };
 
-// 3. Fetch payments *received* (to this receiver)
-export const fetchpayments = async (username) => {
-  await connectDb()
-  const p = await Payment.find({ to_user: username, done: true })
+// 3. Fetch payments *received* by receiver (based on email)
+export const fetchpayments = async (receiverEmail) => {
+  await connectDb();
+  const payments = await Payment.find({ to_user: receiverEmail, done: true })
     .sort({ amount: -1 })
-    .lean()
-  return p
-}
+    .lean();
+  return payments;
+};
 
-// 4. Fetch payments *made* by this donater
-export const fetchDonationsMade = async (username) => {
-  await connectDb()
-  const p = await Payment.find({ from_user: username, done: true })
+// 4. Fetch payments *made* by donater (based on email)
+export const fetchDonationsMade = async (donaterEmail) => {
+  await connectDb();
+  const donations = await Payment.find({ from_user: donaterEmail, done: true })
     .sort({ createdAt: -1 })
-    .lean()
-  return p
-}
+    .lean();
+  return donations;
+};
 
-// 5. Update user profile (name, email, username, description, etc.)
+// 5. Update user profile
 export const updateProfile = async (formData, originalUsername) => {
   await connectDb();
 
   const existingUser = await User.findOne({ username: originalUsername });
   if (!existingUser) return { success: false, error: "User not found" };
 
+  // Prevent duplicate usernames
   if (formData.username !== originalUsername) {
     const usernameTaken = await User.findOne({ username: formData.username });
     if (usernameTaken) return { success: false, error: "Username already taken" };
   }
 
+  // If receiver, ensure Razorpay info is filled
   if (formData.type === "receiver" && (!formData.razorpayid || !formData.razorpaysecret)) {
     return { success: false, error: "Receiver must provide Razorpay credentials" };
   }
 
+  // Apply updates
   Object.assign(existingUser, {
     name: formData.name,
     email: formData.email,

@@ -16,10 +16,10 @@ const fetchFeed = async () => {
       let totalAmount = 0;
 
       if (user.type === "receiver") {
-        const payments = await fetchpayments(user.username);
+        const payments = await fetchpayments(user.email);
         totalAmount = payments.reduce((sum, p) => sum + p.amount, 0);
       } else if (user.type === "donater") {
-        const donations = await fetchDonationsMade(user.username);
+        const donations = await fetchDonationsMade(user.email);
         totalAmount = donations.reduce((sum, p) => sum + p.amount, 0);
       }
 
@@ -42,7 +42,7 @@ const fetchLeaderboard = async () => {
 
   const leaderboardData = await Promise.all(
     donaters.map(async (user) => {
-      const donations = await fetchDonationsMade(user.username);
+      const donations = await fetchDonationsMade(user.email);
       const total = donations.reduce((acc, p) => acc + p.amount, 0);
 
       return {

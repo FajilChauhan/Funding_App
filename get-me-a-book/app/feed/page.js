@@ -39,10 +39,10 @@ const Feed = () => {
         let total = 0;
 
         if (user.type === "receiver") {
-          const payments = await fetchpayments(user.username);
+          const payments = await fetchpayments(user.email);
           total = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
         } else if (user.type === "donater") {
-          const donations = await fetchDonationsMade(user.username);
+          const donations = await fetchDonationsMade(user.email);
           total = donations.reduce((acc, p) => acc + (p.amount || 0), 0);
         }
 
