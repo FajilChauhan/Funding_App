@@ -18,20 +18,20 @@ export const GET = async () => {
 
     if (user.type === "receiver") {
       totalReceived = payments
-        .filter(p => p.to_user === user.username)
+        .filter(p => p.to_user === user.email)
         .reduce((sum, p) => sum + p.amount, 0);
     }
 
     if (user.type === "donater") {
       totalDonated = payments
-        .filter(p => p.name === user.username)
+        .filter(p => p.name === user.email)
         .reduce((sum, p) => sum + p.amount, 0);
     }
 
     return {
       _id: user._id.toString(),
       username: user.username,
-      profilepic: user.profilepic || "",
+      profilepic: user.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg",
       description: user.description || "",
       type: user.type,
       totalAmount: user.type === 'receiver' ? totalReceived : totalDonated
