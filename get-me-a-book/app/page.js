@@ -50,7 +50,7 @@ const fetchLeaderboard = async () => {
       return {
         _id: user._id,
         username: user.username,
-        profilepic: user.profilepic || "/default-profile.jpg",
+        profilepic: user.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg",
         totalDonated: total,
       };
     })
