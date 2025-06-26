@@ -181,7 +181,7 @@ const PaymentPage = ({ username }) => {
                                 <span>
                                     {currentUser?.type === "receiver"
                                         ? `${p.name} donated ₹${p.amount / 100} with message "${p.message}"`
-                                        : `You donated ₹${p.amount / 100} to @${p.to_user} with message "${p.message}"`}
+                                        : `${currentUser.name} donated ₹${p.amount / 100} to this gmail account "${p.to_user}" with message "${p.message}"`}
                                 </span>
                             </li>
                         ))}
