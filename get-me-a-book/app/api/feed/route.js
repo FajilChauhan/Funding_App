@@ -1,5 +1,4 @@
-
-export const dynamic = 'force-dynamic'; // ✅ Required for fresh data every request
+export const dynamic = 'force-dynamic'; // ✅ Disable caching
 
 import { NextResponse } from "next/server";
 import connectDb from "@/db/connectDb";
@@ -8,11 +7,11 @@ import Payment from "@/models/Payment";
 
 export const GET = async () => {
   await connectDb();
+
   const users = await User.find().lean();
+  const payments = await Payment.find({ done: true }).lean(); // ✅ Only completed payments
 
   const result = await Promise.all(users.map(async (user) => {
-    const payments = await Payment.find({}).lean();
-
     let totalReceived = 0;
     let totalDonated = 0;
 
@@ -24,14 +23,14 @@ export const GET = async () => {
 
     if (user.type === "donater") {
       totalDonated = payments
-        .filter(p => p.name === user.email)
+        .filter(p => p.from_user === user.email)
         .reduce((sum, p) => sum + p.amount, 0);
     }
 
     return {
       _id: user._id.toString(),
       username: user.username,
-      profilepic: user.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg",
+      profilepic: user.profilepic || "",
       description: user.description || "",
       type: user.type,
       totalAmount: user.type === 'receiver' ? totalReceived : totalDonated
@@ -45,5 +44,3 @@ export const GET = async () => {
     }
   });
 };
-
-
