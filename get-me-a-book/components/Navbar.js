@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 const Navbar = () => {
   const { data: session, update } = useSession();
@@ -42,7 +43,7 @@ const Navbar = () => {
     <nav className="bg-blue-300 text-black px-4 py-3 flex flex-col sm:flex-row justify-between items-center shadow-md">
       {/* Logo */}
       <Link href="/" className="flex items-center mb-2 sm:mb-0">
-        <img src="/book.webp" width={30} alt="Logo" />
+        <Image src="/book.webp" width={30} alt="Logo" />
         <span className="ml-2 font-bold text-lg">Getme-A-Book!</span>
       </Link>
 

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { fetchpayments, fetchDonationsMade } from "@/actions/useractions";
+import Image from "next/image";
 
 const Feed = () => {
   const [users, setUsers] = useState([]);
@@ -64,7 +65,7 @@ const Feed = () => {
               onClick={() => handleClick(user.username)}
               className="cursor-pointer bg-white border border-gray-200 rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4 items-center hover:bg-gray-50"
             >
-              <img
+              <Image
                 src={user.profilepic || "/default-profile.jpg"}
                 alt="Profile"
                 className="w-20 h-20 rounded-full object-cover"
