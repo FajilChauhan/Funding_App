@@ -14,7 +14,7 @@ const Feed = () => {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch("/api/feed", { cache: "no-store" }); // Disable caching
+        const res = await fetch("/api/feed", { cache: "no-store" });
         const data = await res.json();
 
         if (data && Array.isArray(data.users)) {
@@ -36,16 +36,7 @@ const Feed = () => {
 
     for (const user of userList) {
       try {
-        let total = 0;
-
-        if (user.type === "receiver") {
-          const payments = await fetchpayments(user.email);
-          total = payments.reduce((acc, p) => acc + (p.amount || 0), 0);
-        } else if (user.type === "donater") {
-          const donations = await fetchDonationsMade(user.email);
-          total = donations.reduce((acc, p) => acc + (p.amount || 0), 0);
-        }
-
+        let total = user.totalAmount || 0; // ✅ Already calculated in API
         updatedAmounts[user._id] = total;
       } catch (err) {
         console.error(`Error calculating for ${user.username}`, err);
@@ -81,7 +72,9 @@ const Feed = () => {
               <div className="text-center sm:text-left">
                 <p className="font-bold text-lg text-blue-700 break-words">@{user.username}</p>
                 {user.type === "receiver" && (
-                  <p className="text-gray-600 text-sm">{user.description || "No description provided."}</p>
+                  <p className="text-gray-600 text-sm">
+                    {user.description || "No description provided."}
+                  </p>
                 )}
                 <p
                   className={`mt-1 font-medium ${
