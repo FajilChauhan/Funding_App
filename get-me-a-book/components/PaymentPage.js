@@ -8,8 +8,6 @@ import { useSearchParams, useRouter } from 'next/navigation';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce } from 'react-toastify';
-import Image from "next/image";
-import { useCallback } from 'react';
 
 const PaymentPage = ({ username }) => {
     const [paymentform, setPaymentform] = useState({ name: "", message: "", amount: "" });
@@ -129,13 +127,13 @@ const PaymentPage = ({ username }) => {
 
             {/* Cover and Profile */}
             <div className="top-3 cover w-full bg-red-50 relative">
-                <Image
+                <img
                     className="object-cover w-full h-[60vh]"
                     src="https://previews.123rf.com/images/yourapechkin/yourapechkin2412/yourapechkin241215714/239379490-a-spacious-library-filled-with-books-showcases-a-glowing-globe-under-a-starry-sky-and-floating.jpg"
                     alt="cover"
                 />
                 <div className="absolute -bottom-20 right-1/2 translate-x-1/2 border-black overflow-hidden border-2 rounded-full size-32">
-                    <Image
+                    <img
                         className="rounded-full object-cover size-32"
                         src={currentUser?.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg"}
                         alt="profile"
@@ -151,17 +149,20 @@ const PaymentPage = ({ username }) => {
                 <div className="text-slate-500">
                     {currentUser?.type === "receiver" ? (
                         <>
-                            <span className="font-bold">{p.name}</span> donated <span className="font-bold">₹{p.amount / 100}</span> with message&nbsp;
-                            <span className="font-bold">&quot;{p.message}&quot;</span>
+                            {currentUser.description}
+                            {" | "}
+                            <span className="font-bold text-xl text-green-600">
+                                Total received: ₹{totalAmount / 100}
+                            </span>
                         </>
                     ) : (
                         <>
-                            <span className="font-bold">{currentUser.name}</span> donated <span className="font-bold">₹{p.amount / 100}</span> to this gmail account&nbsp;
-                            <span className="font-bold">{p.to_user}</span> with message&nbsp;
-                            <span className="font-bold">&quot;{p.message}&quot;</span>
+                            Helping with Donations {" | "}
+                            <span className="font-bold text-xl text-blue-600">
+                                Total donated: ₹{totalAmount / 100}
+                            </span>
                         </>
                     )}
-
                 </div>
             </div>
 
@@ -176,20 +177,11 @@ const PaymentPage = ({ username }) => {
                         {payments.length === 0 && <li>No Payments Yet</li>}
                         {payments.map((p, i) => (
                             <li key={i} className="my-2 flex gap-2 items-start">
-                                <Image className="rounded-full" width={30} src="/avatar.gif" alt="user avatar" />
+                                <img className="rounded-full" width={30} src="/avatar.gif" alt="user avatar" />
                                 <span>
-                                    {currentUser?.type === "receiver" ? (
-                                        <>
-                                            <span className="font-bold">{p.name}</span> donated <span className="font-bold">₹{p.amount / 100}</span> with message{" "}
-                                            <span className="font-bold">"{p.message}"</span>
-                                        </>
-                                    ) : (
-                                        <>
-                                            <span className="font-bold">{currentUser.name}</span> donated <span className="font-bold">₹{p.amount / 100}</span> to this gmail account{" "}
-                                            <span className="font-bold">{p.to_user}</span> with message <span className="font-bold">"{p.message}"</span>
-                                        </>
-                                    )}
-
+                                    {currentUser?.type === "receiver"
+                                        ? `${p.name} donated ₹${p.amount / 100} with message "${p.message}"`
+                                        : `"${currentUser.name}" donated "₹${p.amount / 100}" to this gmail account "${p.to_user}" with message "${p.message}"`}
                                 </span>
                             </li>
                         ))}
