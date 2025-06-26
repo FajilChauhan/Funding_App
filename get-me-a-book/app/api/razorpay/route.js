@@ -6,24 +6,23 @@ import connectDb from "@/db/connectDb";
 
 export const POST = async (req) => {
   await connectDb();
+
   const formData = await req.formData();
-  const body = Object.fromEntries(formData); // Extract payment data
+  const body = Object.fromEntries(formData); // razorpay_order_id, razorpay_payment_id, razorpay_signature
 
-  // Find payment record by Razorpay order ID
+  // Find the payment using Razorpay order ID
   const payment = await Payment.findOne({ oid: body.razorpay_order_id });
-
   if (!payment) {
     return NextResponse.json({ success: false, message: "Order ID not found" });
   }
 
-  // Find the receiver (to_user) from User model
-  const receiver = await User.findOne({ username: payment.to_user });
-
+  // ✅ Fetch receiver using email (since to_user is now stored as email)
+  const receiver = await User.findOne({ email: payment.to_user });
   if (!receiver || !receiver.razorpaysecret) {
     return NextResponse.json({ success: false, message: "Receiver credentials not found" });
   }
 
-  // Validate payment using receiver's own Razorpay secret
+  // ✅ Validate payment signature
   const isValid = validatePaymentVerification(
     {
       order_id: body.razorpay_order_id,
@@ -34,7 +33,7 @@ export const POST = async (req) => {
   );
 
   if (isValid) {
-    // Mark payment as completed
+    // ✅ Mark payment as completed
     const updatedPayment = await Payment.findOneAndUpdate(
       { oid: body.razorpay_order_id },
       { done: true },
@@ -42,7 +41,7 @@ export const POST = async (req) => {
     );
 
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_URL}/${updatedPayment.to_user}?paymentdone=true`
+      `${process.env.NEXT_PUBLIC_URL}/${receiver.username}?paymentdone=true`
     );
   } else {
     return NextResponse.json({
