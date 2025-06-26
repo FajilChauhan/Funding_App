@@ -179,9 +179,18 @@ const PaymentPage = ({ username }) => {
                             <li key={i} className="my-2 flex gap-2 items-start">
                                 <img className="rounded-full" width={30} src="/avatar.gif" alt="user avatar" />
                                 <span>
-                                    {currentUser?.type === "receiver"
-                                        ? `${p.name} donated ₹${p.amount / 100} with message "${p.message}"`
-                                        : `${currentUser.name} donated ₹${p.amount / 100} to this gmail account "${p.to_user}" with message "${p.message}"`}
+                                    {currentUser?.type === "receiver" ? (
+                                        <>
+                                            <span className="font-bold">{p.name}</span> donated <span className="font-bold">₹{p.amount / 100}</span> with message{" "}
+                                            <span className="font-bold">"{p.message}"</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="font-bold">{currentUser.name}</span> donated <span className="font-bold">₹{p.amount / 100}</span> to this gmail account{" "}
+                                            <span className="font-bold">{p.to_user}</span> with message <span className="font-bold">"{p.message}"</span>
+                                        </>
+                                    )}
+
                                 </span>
                             </li>
                         ))}
