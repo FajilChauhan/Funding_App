@@ -1,33 +1,39 @@
 "use client";
 
-import Link from "next/link"; import { useSession } from "next-auth/react"; import { useEffect, useState } from "react"; import { useRouter } from "next/navigation";
+import Link from "next/link"; import { useSession } from "next-auth/react"; import { useEffect, useState } from "react"; import { useRouter } from "next/navigation"; import Image from "next/image";
 
-export default function Home() { const { data: session } = useSession(); const [users, setUsers] = useState([]); const router = useRouter();
+const fetchFeedAndLeaderboard = async () => { const res = await fetch("/api/feed", { cache: "no-store" }); const data = await res.json(); if (!data || !data.users) return { feedUsers: [], leaderboard: [] };
 
-useEffect(() => { const fetchData = async () => { try { const res = await fetch("/api/feed", { cache: "no-store" }); const data = await res.json(); if (data?.users) { setUsers(data.users); } } catch (error) { console.error("Failed to fetch feed data:", error); } };
+const users = data.users;
 
-fetchData();
+const feedUsers = users.slice(0, 2); const donaters = users.filter((user) => user.type === "donater");
 
-}, []);
+const leaderboard = donaters .sort((a, b) => b.totalAmount - a.totalAmount) .slice(0, 5);
+
+return { feedUsers, leaderboard }; };
+
+export default function Home() { const { data: session } = useSession(); const [feedUsers, setFeedUsers] = useState([]); const [leaderboard, setLeaderboard] = useState([]); const router = useRouter();
+
+useEffect(() => { fetchFeedAndLeaderboard().then(({ feedUsers, leaderboard }) => { setFeedUsers(feedUsers); setLeaderboard(leaderboard); }); }, []);
 
 const handleProfileClick = (username) => { router.push(/${username}); };
 
-const top2 = users.slice(0, 2); const leaderboard = users .filter((u) => u.type === "donater") .sort((a, b) => b.totalAmount - a.totalAmount) .slice(0, 5);
-
-return ( <div className="bg-gray-100 min-h-screen text-black"> {/* Hero Section */} <div className="flex flex-col items-center justify-center gap-4 py-8 px-4 md:px-6 text-center"> <div className="font-bold text-3xl md:text-5xl flex items-center justify-center"> <span className="mx-2">Buy Me a Book</span> <img src="/book.webp" width={45} className="w-[45px] md:w-[55px]" alt="Logo" /> </div> </div>
+return ( <div className="bg-gray-100 min-h-screen text-black"> {/* Hero Section */} <div className="flex flex-col items-center justify-center gap-4 py-8 px-4 md:px-6 text-center"> <div className="font-bold text-3xl md:text-5xl flex items-center justify-center"> <span className="mx-2">Buy Me a Book</span> <Image src="/book.webp" width={45} height={45} className="w-[45px] md:w-[55px]" alt="Logo" /> </div> </div>
 
 {/* Feed Section */}
   <div className="w-full py-6 px-4">
     <div className="max-w-5xl mx-auto grid gap-6">
-      {top2.map((user) => (
+      {feedUsers.map((user) => (
         <div
           key={user._id}
           className="bg-white border border-gray-300 rounded-lg p-4 shadow flex flex-col sm:flex-row gap-4 items-center cursor-pointer hover:bg-gray-50"
           onClick={() => handleProfileClick(user.username)}
         >
-          <img
+          <Image
             src={user.profilepic || "/default-profile.jpg"}
             alt="User"
+            width={80}
+            height={80}
             className="w-20 h-20 rounded-full object-cover"
           />
           <div className="flex flex-col text-center sm:text-left">
@@ -35,13 +41,9 @@ return ( <div className="bg-gray-100 min-h-screen text-black"> {/* Hero Section 
             {user.type === "receiver" && (
               <p className="text-gray-600 text-sm">{user.description || "No description provided."}</p>
             )}
-            <p
-              className={`mt-1 font-medium ${
-                user.type === "receiver" ? "text-green-700" : "text-purple-700"
-              }`}
-            >
-              💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹
-              {(user.totalAmount || 0) / 100}
+
+            <p className={`mt-1 font-medium ${user.type === "receiver" ? "text-green-700" : "text-purple-700"}`}>
+              💸 {user.type === "receiver" ? "Total Received" : "Total Donated"}: ₹{(user.totalAmount || 0) / 100}
             </p>
           </div>
         </div>
@@ -64,7 +66,7 @@ return ( <div className="bg-gray-100 min-h-screen text-black"> {/* Hero Section 
 
   {/* Leaderboard Section */}
   <div className="w-full py-10 bg-gray-100 px-4">
-    <h2 className="text-3xl font-bold text-center mb-8">Meet the Helpers 🧡</h2>
+    <h2 className="text-3xl font-bold text-center mb-8">Meet the Helpers 🦡</h2>
     <div className="max-w-5xl mx-auto space-y-4 grid gap-6 bg-white">
       {leaderboard.map((user, index) => (
         <div
@@ -73,14 +75,16 @@ return ( <div className="bg-gray-100 min-h-screen text-black"> {/* Hero Section 
           onClick={() => handleProfileClick(user.username)}
         >
           <span className="font-bold text-xl">#{index + 1}</span>
-          <img
+          <Image
             src={user.profilepic || "/default-profile.jpg"}
             alt="Donater"
+            width={80}
+            height={80}
             className="w-20 h-20 rounded-full object-cover"
           />
           <div className="flex flex-col text-center sm:text-left">
             <span className="font-semibold text-blue-700">@{user.username}</span>
-            <span className="text-purple-700">Total Donated: ₹{(user.totalAmount || 0) / 100}</span>
+            <span className="text-purple-700">Total Donated: ₹{user.totalAmount / 100}</span>
           </div>
         </div>
       ))}
@@ -140,7 +144,8 @@ return ( <div className="bg-gray-100 min-h-screen text-black"> {/* Hero Section 
   <div className="w-full flex flex-col items-center justify-center px-4 mb-16 text-black">
     <h1 className="text-3xl font-bold text-center mb-6">Contact Us</h1>
     <div className="w-full max-w-xl bg-white p-6 rounded-lg shadow-md border border-gray-200 text-center">
-      <p className="mb-2">📞 Get-Me-A-Book Help-Line: <span className="text-blue-900 font-semibold">8866430415</span></p>
+      <p className="mb-2">📞 Get-Me-A-Book Help-Line: <span className="text-blue-900 font-semibold">8866430415</span>
+      </p>
       <p className="mb-2">📧 Email: <span className="text-blue-900 font-semibold">support@getmeabook.in</span></p>
       <p>📱 Instagram: <span className="text-blue-900 font-semibold">getmeabook_27.12</span></p>
     </div>
@@ -149,4 +154,4 @@ return ( <div className="bg-gray-100 min-h-screen text-black"> {/* Hero Section 
 
 ); }
 
-              
+        
