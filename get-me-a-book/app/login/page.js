@@ -2,7 +2,7 @@
 import React from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import Image from "next/image";
+//import Image from "next/image";
 
 const Login = () => {
   const { data: session } = useSession();
@@ -18,7 +18,7 @@ const Login = () => {
       
       {/* Logo & App Name */}
       <div className="flex items-center mb-6">
-        <Image src="/book.webp" alt="logo" className="w-12 h-12" />
+        <img src="/book.webp" alt="logo" className="w-12 h-12" />
         <h1 className="ml-3 text-3xl font-extrabold">Get-Me-A-Book</h1>
       </div>
 

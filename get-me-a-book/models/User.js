@@ -6,7 +6,8 @@ const UserSchema = new Schema({
   name: { type: String },
   username: { type: String, required: true, unique: true},
   profilepic: {
-    type: String
+    type: String,
+    default: "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg"
   },
   coverpic: {
     type: String

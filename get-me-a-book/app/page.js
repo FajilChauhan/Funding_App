@@ -5,7 +5,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import { fetchpayments, fetchDonationsMade } from "@/actions/useractions";
 import { useCallback } from 'react';
-import Image from "next/image";
+//import Image from "next/image";
 
 const fetchFeed = async () => {
   const res = await fetch("/api/feed");
@@ -81,7 +81,7 @@ export default function Home() {
       <div className="flex flex-col items-center justify-center gap-4 py-8 px-4 md:px-6 text-center">
         <div className="font-bold text-3xl md:text-5xl flex items-center justify-center">
           <span className="mx-2">Buy Me a Book</span>
-          <Image src="book.webp" width={45} className="w-[45px] md:w-[55px]" alt="Logo" />
+          <img src="book.webp" width={45} className="w-[45px] md:w-[55px]" alt="Logo" />
         </div>
       </div>
 
@@ -94,8 +94,8 @@ export default function Home() {
               className="bg-white border border-gray-300 rounded-lg p-4 shadow flex flex-col sm:flex-row gap-4 items-center cursor-pointer hover:bg-gray-50"
               onClick={() => handleProfileClick(user.username)}
             >
-              <Image
-                src={user.profilepic || "/default-profile.jpg"}
+              <img
+                src={user.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg"}
                 alt="User"
                 className="w-20 h-20 rounded-full object-cover"
               />
@@ -138,8 +138,8 @@ export default function Home() {
               onClick={() => handleProfileClick(user.username)}
             >
               <span className="font-bold text-xl">#{index + 1}</span>
-              <Image
-                src={user.profilepic}
+              <img
+                src={user.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg"}
                 alt="Donater"
                 className="w-20 h-20 rounded-full object-cover"
               />

@@ -100,7 +100,7 @@ const PaymentPage = ({ username }) => {
                 currency: "INR",
                 name: "Get Me A Book",
                 description: "Support a book request",
-                image: "/logo.png",
+                image: "/book.webp",
                 order_id: response.id,
                 callback_url: `${process.env.NEXT_PUBLIC_URL}/api/razorpay`,
                 prefill: {

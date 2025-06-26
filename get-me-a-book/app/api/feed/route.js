@@ -32,7 +32,7 @@ export const GET = async () => {
       _id: user._id.toString(),
       username: user.username,
       email: user.email, // ✅ include for frontend fetch
-      profilepic: user.profilepic || "",
+      profilepic: user.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg",
       description: user.description || "",
       type: user.type,
       totalAmount: user.type === "receiver" ? totalReceived : totalDonated

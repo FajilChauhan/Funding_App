@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { fetchpayments, fetchDonationsMade } from "@/actions/useractions";
-import Image from "next/image";
-import { useCallback } from 'react';
+//import Image from "next/image";
+//import { useCallback } from 'react';
 
 const Feed = () => {
   const [users, setUsers] = useState([]);
@@ -66,7 +66,7 @@ const Feed = () => {
               onClick={() => handleClick(user.username)}
               className="cursor-pointer bg-white border border-gray-200 rounded-lg shadow-md p-4 flex flex-col sm:flex-row gap-4 items-center hover:bg-gray-50"
             >
-              <Image
+              <img
                 src={user.profilepic || "https://insidetime.org/wp-content/uploads/2021/10/Handing-in-books.jpg"}
                 alt="Profile"
                 className="w-20 h-20 rounded-full object-cover"
