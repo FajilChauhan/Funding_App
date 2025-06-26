@@ -9,6 +9,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { Bounce } from 'react-toastify';
 import Image from "next/image";
+import { useCallback } from 'react';
 
 const PaymentPage = ({ username }) => {
     const [paymentform, setPaymentform] = useState({ name: "", message: "", amount: "" });
@@ -150,20 +151,17 @@ const PaymentPage = ({ username }) => {
                 <div className="text-slate-500">
                     {currentUser?.type === "receiver" ? (
                         <>
-                            {currentUser.description}
-                            {" | "}
-                            <span className="font-bold text-xl text-green-600">
-                                Total received: ₹{totalAmount / 100}
-                            </span>
+                            <span className="font-bold">{p.name}</span> donated <span className="font-bold">₹{p.amount / 100}</span> with message&nbsp;
+                            <span className="font-bold">&quot;{p.message}&quot;</span>
                         </>
                     ) : (
                         <>
-                            Helping with Donations {" | "}
-                            <span className="font-bold text-xl text-blue-600">
-                                Total donated: ₹{totalAmount / 100}
-                            </span>
+                            <span className="font-bold">{currentUser.name}</span> donated <span className="font-bold">₹{p.amount / 100}</span> to this gmail account&nbsp;
+                            <span className="font-bold">{p.to_user}</span> with message&nbsp;
+                            <span className="font-bold">&quot;{p.message}&quot;</span>
                         </>
                     )}
+
                 </div>
             </div>
 
