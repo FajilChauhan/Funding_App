@@ -1,7 +1,7 @@
 # 📚 Get Me A Book
 
 A full-stack crowdfunding platform where users can either **donate** books/funds or **receive** support to get books.  
-Built with **Next.js, MongoDB, Razorpay, and TailwindCSS**.
+Built with **React.Js, Next.js, MongoDB, Razorpay, and TailwindCSS**.
 
 ---
 
@@ -16,7 +16,7 @@ Built with **Next.js, MongoDB, Razorpay, and TailwindCSS**.
 ---
 
 ## 🛠️ Tech Stack
-- **Frontend**: Next.js, TailwindCSS  
+- **Frontend**: React.Js, Next.js, TailwindCSS  
 - **Backend**: Next.js API Routes, MongoDB  
 - **Authentication**: NextAuth (Google OAuth)  
 - **Payment Gateway**: Razorpay  
